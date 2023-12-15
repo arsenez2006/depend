@@ -1,0 +1,6 @@
+BasedOnStyle: Mozilla
+AccessModifierOffset: '-4'
+BreakBeforeBraces: Attach
+ColumnLimit: '80'
+IndentWidth: '4'
+TabWidth: '4'

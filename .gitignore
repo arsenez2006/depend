@@ -1,5 +1,7 @@
 .vs
 .vscode
 .clangd
+.cache
 *.sh
 build
+out
