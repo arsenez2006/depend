@@ -5,6 +5,8 @@ on:
     branches:
       - dev
       - master
+permissions:
+  contents: write
 jobs:
   create_version:
     name: Create version
