@@ -28,3 +28,9 @@ jobs:
         run: |
           cd ${{ github.workspace }}/build
           make
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: ${{ github.workspace }}/build/depend
