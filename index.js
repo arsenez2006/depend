@@ -12,6 +12,8 @@ async function download_installer() {
             "X-GitHub-Api-Version": "2022-11-28"
         }
     });
+
+    console.log(release);
 }
 
 async function run() {
