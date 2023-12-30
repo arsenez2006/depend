@@ -63,3 +63,5 @@
 *.hex
 *.sh
 
+# Node trash
+node_modules/

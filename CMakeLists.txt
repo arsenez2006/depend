@@ -30,4 +30,3 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
 target_link_libraries(${PROJECT_NAME} libgit OpenSSL::SSL OpenSSL::Crypto ZLIB::ZLIB pcre)
 
 install(TARGETS ${PROJECT_NAME})
-

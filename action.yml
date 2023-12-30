@@ -1,0 +1,14 @@
+name: Depend
+description: Installs dependencies
+inputs:
+  cache:
+    description: Enable dependency caching
+    required: true
+    default: "false"
+  nasm:
+    description: Install NASM
+    required: true
+    default: "false"
+  runs:
+    using: node20
+    main: index.js

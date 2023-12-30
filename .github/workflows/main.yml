@@ -88,4 +88,3 @@ jobs:
           name: ${{ vars.RELEASE_NAME }} ${{ needs.version.outputs.tag }}
           tag_name: ${{ needs.version.outputs.tag }}
           files: ${{ steps.cmake.outputs.download-path }}/${{ vars.CMAKE_BUILD_RELEASE }}
-
