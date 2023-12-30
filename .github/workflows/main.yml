@@ -1,0 +1,91 @@
+name: Main workflow
+on:
+  push
+jobs:
+  build:
+    name: Build CMake project
+    runs-on: ubuntu-latest
+    env:
+      SRC_DIR: ${{ github.workspace }}/src
+      BUILD_DIR: ${{ github.workspace }}/build
+      INSTALL_DIR: ${{ github.workspace }}/install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          path: src
+
+      - name: Configure CMake
+        run: |
+          mkdir -p ${{ env.BUILD_DIR }}
+          cmake ${{ env.SRC_DIR }} -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=Release
+        
+      - name: Build CMake project
+        run: |
+          cmake --build ${{ env.BUILD_DIR }} --config Release
+      
+      - name: Install CMake project
+        run: |
+          cmake --install ${{ env.BUILD_DIR }} --config Release
+
+      - name: Create build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cmake-build
+          path: ${{ env.INSTALL_DIR }}
+
+  version:
+    name: Create version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      
+      - name: Run Git Version
+        id: version
+        uses: codacy/git-version@2.8.0
+        with:
+          prefix: v
+
+      - name: Create tag
+        if: ${{ steps.version.outputs.version != steps.version.outputs.previous-version }}
+        run: |
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+
+  release:
+    name: Create release
+    if: ${{ github.ref_name == 'master' }}
+    runs-on: ubuntu-latest
+    env:
+      CMAKE_ARTIFACT: ${{ github.workspace }}/cmake
+    needs: 
+      - version
+      - build
+    permissions:
+      contents: write
+    steps:
+      - name: Download CMake artifacts
+        id: cmake
+        uses: actions/download-artifact@v4
+        with:
+          name: cmake-build
+          path: ${{ env.CMAKE_ARTIFACT }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: false
+          name: ${{ vars.RELEASE_NAME }} ${{ needs.version.outputs.tag }}
+          tag_name: ${{ needs.version.outputs.tag }}
+          files: ${{ steps.cmake.outputs.download-path }}/${{ vars.CMAKE_BUILD_RELEASE }}
+
