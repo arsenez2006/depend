@@ -11,3 +11,6 @@ jobs:
 
       - name: depend action
         uses: ./
+        with: 
+          nasm: true
+          cache: true

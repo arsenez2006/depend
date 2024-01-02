@@ -5,7 +5,8 @@ const { request } = require("@octokit/request");
 
 const path = require("path")
 const { createWriteStream, chmodSync } = require("fs");
-const { error } = require("console");
+const { execFileSync } = require("child_process");
+const { once } = require("events")
 
 async function download_installer(path) {
     try {
@@ -51,8 +52,10 @@ async function download_installer(path) {
             }
         });
         await response.body.pipeTo(file_stream);
-
+        
         chmodSync(file.path, "755");
+        file.end();
+        await once(file, "finish");
 
         action.info(`Installer downloaded to ${file.path}`);
         return true;
@@ -60,6 +63,37 @@ async function download_installer(path) {
         action.error(error);
         return false;
     }
+}
+
+async function install_component(installer, working_directory, use_cache, comp) {
+    action.info(`Installing ${comp}...`);
+    const comp_path = path.join(working_directory, comp);
+    const comp_bin = path.join(comp_path, "bin");
+    io.mkdirP(comp_path);
+    action.debug(`${comp} path is ${comp_path}`);
+
+    if (use_cache && cache.isFeatureAvailable()) {
+        const version = execFileSync(installer, [ `--prefix=${comp_path}`, `--install=${comp}`, `--dry-run` ]).filter(el => 33 <= el && el <= 126).toString();
+        action.debug(`${comp} latest version is ${version}`);
+        const key = `${comp}-${version}`;
+        const cache_id = await cache.restoreCache([ comp_bin ], key);
+        if (cache_id != undefined) {
+            action.info("Restored from cache");
+        } else {
+            execFileSync(installer, [ `--prefix=${comp_path}`, `--install=${comp}` ], {
+                stdio: "inherit"
+            });
+
+            action.debug(`Saving cache for ${comp}`);
+            await cache.saveCache([ comp_bin ], key);
+        }
+    } else {
+        execFileSync(installer, [ `--prefix=${comp_path}`, `--install=${comp}` ], {
+            stdio: "inherit"
+        });
+    }
+
+    action.addPath(comp_bin);
 }
 
 async function run() {
@@ -73,6 +107,12 @@ async function run() {
     if (!await download_installer(installer)) {
         action.setFailed("Failed to download installer");
     }
+
+    const use_cache = action.getBooleanInput("cache");
+    const components = [];
+    action.getBooleanInput("nasm") && components.push("nasm");
+
+    components.map(async(el) => await install_component(installer, working_directory, use_cache, el));
 }
 
 run();
