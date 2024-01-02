@@ -65,3 +65,6 @@
 
 # Node trash
 node_modules/
+
+# Action output
+deps/
