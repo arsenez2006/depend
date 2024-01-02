@@ -65,7 +65,10 @@ async function download_installer(path) {
 async function run() {
     const working_directory = path.join(process.cwd(), "deps");
     await io.mkdirP(working_directory);
+    action.debug(`working_directory is ${working_directory}`);
+
     const installer = path.join(working_directory, "depend");
+    action.debug(`installer path is ${installer}`);
 
     if (!await download_installer(installer)) {
         action.setFailed("Failed to download installer");
