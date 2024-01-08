@@ -1,12 +1,12 @@
-const action = require("@actions/core");
-const cache = require("@actions/cache");
-const io = require("@actions/io");
-const { request } = require("@octokit/request");
+import action from "@actions/core";
+import cache from "@actions/cache";
+import io from "@actions/io";
+import { request } from "@octokit/request";
 
-const path = require("path")
-const { createWriteStream, chmodSync } = require("fs");
-const { execFileSync } = require("child_process");
-const { once } = require("events")
+import path from "path";
+import { createWriteStream, chmodSync } from "fs";
+import { execFileSync } from "child_process";
+import { once } from "events";
 
 async function download_installer(path) {
     try {
@@ -19,7 +19,7 @@ async function download_installer(path) {
                 "X-GitHub-Api-Version": "2022-11-28"
             }
         });
-        if (release.status != 200) {
+        if (release.status !== 200) {
             throw "Failed to get latest release";
         }
 
@@ -31,12 +31,12 @@ async function download_installer(path) {
                 "X-GitHub-Api-Version": "2022-11-28"
             }
         });
-        if (assets.status != 200) {
+        if (assets.status !== 200) {
             throw "Failed to get release assets list";
         }
 
-        const asset_depend = assets.data.find(el => el.name == "depend");
-        if (asset_depend == null) {
+        const asset_depend = assets.data.find(el => el.name === "depend");
+        if (asset_depend === null) {
             throw "Failed to get asset \"depend\"";
         }
 
@@ -52,7 +52,7 @@ async function download_installer(path) {
             }
         });
         await response.body.pipeTo(file_stream);
-        
+
         chmodSync(file.path, "755");
         file.end();
         await once(file, "finish");
@@ -73,22 +73,22 @@ async function install_component(installer, working_directory, use_cache, comp) 
     action.debug(`${comp} path is ${comp_path}`);
 
     if (use_cache && cache.isFeatureAvailable()) {
-        const version = execFileSync(installer, [ `--prefix=${comp_path}`, `--install=${comp}`, `--dry-run` ]).filter(el => 33 <= el && el <= 126).toString();
+        const version = execFileSync(installer, [`--prefix=${comp_path}`, `--install=${comp}`, `--dry-run`]).filter(el => 33 <= el && el <= 126).toString();
         action.debug(`${comp} latest version is ${version}`);
         const key = `${comp}-${version}`;
-        const cache_id = await cache.restoreCache([ comp_bin ], key);
-        if (cache_id != undefined) {
+        const cache_id = await cache.restoreCache([comp_bin], key);
+        if (cache_id !== undefined) {
             action.info("Restored from cache");
         } else {
-            execFileSync(installer, [ `--prefix=${comp_path}`, `--install=${comp}` ], {
+            execFileSync(installer, [`--prefix=${comp_path}`, `--install=${comp}`], {
                 stdio: "inherit"
             });
 
             action.debug(`Saving cache for ${comp}`);
-            await cache.saveCache([ comp_bin ], key);
+            await cache.saveCache([comp_bin], key);
         }
     } else {
-        execFileSync(installer, [ `--prefix=${comp_path}`, `--install=${comp}` ], {
+        execFileSync(installer, [`--prefix=${comp_path}`, `--install=${comp}`], {
             stdio: "inherit"
         });
     }
@@ -112,7 +112,10 @@ async function run() {
     const components = [];
     action.getBooleanInput("nasm") && components.push("nasm");
 
-    components.map(async(el) => await install_component(installer, working_directory, use_cache, el));
+    for (let i = 0; i < components.length; i++) {
+        await install_component(installer, working_directory, cache, components[i]);
+    }
 }
 
-run();
+await run();
+process.exit();
