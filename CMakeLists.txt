@@ -13,10 +13,10 @@ ExternalProject_Add(libgit_ep
     GIT_TAG "origin/main"
     GIT_SHALLOW TRUE
 
-    CMAKE_CACHE_ARGS 
-        "-DBUILD_SHARED_LIBS:BOOL=OFF"
-        "-DBUILD_TESTS:BOOL=OFF"
-        "-DCMAKE_INSTALL_PREFIX:FILEPATH=<INSTALL_DIR>"
+    CMAKE_CACHE_ARGS
+    "-DBUILD_SHARED_LIBS:BOOL=OFF"
+    "-DBUILD_TESTS:BOOL=OFF"
+    "-DCMAKE_INSTALL_PREFIX:FILEPATH=<INSTALL_DIR>"
 )
 add_library(libgit STATIC IMPORTED)
 add_dependencies(libgit libgit_ep)

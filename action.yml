@@ -9,6 +9,10 @@ inputs:
     description: Install NASM
     required: true
     default: "false"
+  doxygen:
+    description: Install Doxygen
+    required: true
+    default: "false"
 runs:
   using: node20
   main: dist/index.js
