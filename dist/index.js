@@ -83363,6 +83363,7 @@ async function run() {
     const use_cache = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput("cache");
     const components = [];
     _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput("nasm") && components.push("nasm");
+    _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput("doxygen") && components.push("doxygen");
 
     for (let i = 0; i < components.length; i++) {
         await install_component(installer, working_directory, _actions_cache__WEBPACK_IMPORTED_MODULE_1__, components[i]);

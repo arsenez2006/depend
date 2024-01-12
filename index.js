@@ -111,6 +111,7 @@ async function run() {
     const use_cache = action.getBooleanInput("cache");
     const components = [];
     action.getBooleanInput("nasm") && components.push("nasm");
+    action.getBooleanInput("doxygen") && components.push("doxygen");
 
     for (let i = 0; i < components.length; i++) {
         await install_component(installer, working_directory, cache, components[i]);
