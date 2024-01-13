@@ -114,7 +114,7 @@ async function run() {
     action.getBooleanInput("doxygen") && components.push("doxygen");
 
     for (let i = 0; i < components.length; i++) {
-        await install_component(installer, working_directory, cache, components[i]);
+        await install_component(installer, working_directory, use_cache, components[i]);
     }
 }
 
